@@ -1,0 +1,172 @@
+=== JEP-266: Stream API Improvements(More Concurrency Updates)
+
+* 在java9中針對stream api新增了許多方法
+
+[cols="1,2"]
+|===
+|Method name | 簡介
+
+|takeWhile
+|將stream的內容做判定，返回第一個為FALSE之前的數據
+
+|dropWhile
+|將stream的內容做判定，返回第一個為FALSE(包含原本)後的數據
+
+|iterate
+|類似for回圈內的方法，有初始、判斷、疊加
+
+|ofNullable 
+|為預防null，如果為null則返回空的stream
+
+
+|=== 
+
+
+
+==== takeWhile
+
+** java8
+[source,java]
+----
+public class TakeWhileExample {
+    public static void main(String[] args) {
+        List<String> alphabets = Arrays.asList("a", "b", "c", "d", "e", "f", "g", "h", "i");
+        final boolean[] check = {true};
+        List<String> valueList = alphabets.stream().reduce(new ArrayList<String>(),
+                new BiFunction<ArrayList<String>, String, ArrayList<String>>() {
+                    @Override
+                    public ArrayList<String> apply(ArrayList<String> strings, String s) {
+                        if (s.equals("d")) {
+                            check[0] = Boolean.FALSE;
+                        }
+                        if (check[0]) {
+                            strings.add(s);
+                        }
+                        return strings;
+                    }
+                }, new BinaryOperator<ArrayList<String>>() {
+                    @Override
+                    public ArrayList<String> apply(ArrayList<String> strings, ArrayList<String> strings2) {
+                        strings.addAll(strings2);
+                        return strings;
+                    }
+                });
+      
+        System.out.println(valueList);
+    }
+}
+
+Output:
+ 
+[a, b, c]
+----
+
+** java9
+[source,java]
+----
+public class TakeWhileExample {
+    public static void main(String[] args) {
+        List<String> alphabets = List.of("a", "b", "c", "d", "e", "f", "g", "h", "i");
+        
+        List<String> subset1 = alphabets
+                .stream()
+                .takeWhile(s -> !s.equals("d"))
+                .collect(Collectors.toList());
+
+        System.out.println(subset1);
+    }
+}
+
+Output:
+ 
+[a, b, c]
+----
+
+
+
+==== dropWhile 
+
+** java9
+[source,java]
+----
+public class TakeWhileExample {
+    public static void main(String[] args) {
+        List<String> alphabets = List.of("a", "b", "c", "d", "e", "f", "g", "h", "i");
+
+        List<String> subset2 = alphabets
+                .stream()
+                .dropWhile(s -> !s.equals("d"))
+                .collect(Collectors.toList());
+
+        System.out.println(subset2);
+    }
+}
+
+Output:
+
+[d, e, f, g, h, i]
+----
+
+
+==== Iterate
+
+* java8
+[source,java]
+----
+public class TakeWhileExample {
+    public static void main(String[] args) {
+         List<Integer> numbers = Stream.iterate(1, i -> i + 1)
+                .limit(10)
+                .collect(Collectors.toList());
+
+        System.out.println(numbers);
+    }
+}
+
+Output:
+ 
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+----
+
+
+* java9
+[source,java]
+----
+public class TakeWhileExample {
+    public static void main(String[] args) {
+        List<Integer> numbers = Stream
+                .iterate(1, i -> i <= 10, i -> i + 1)
+                .collect(Collectors.toList());
+
+        System.out.println(numbers);
+    }
+}
+
+Output:
+ 
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+----
+
+
+==== ofNullable
+
+* java9
+[source,java]
+----
+public class TakeWhileExample {
+    public static void main(String[] args) {
+        Stream<String> stream = Stream.ofNullable("123");
+        System.out.println(stream.count());
+ 
+        stream = Stream.ofNullable(null);
+        System.out.println(stream.count());
+    }
+}
+
+Output:
+ 
+1
+0
+----
+
+

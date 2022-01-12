@@ -1,0 +1,75 @@
+== JAVA11 新特性
+
+=== New String Methods
+
+[soruce,java]
+----
+  // 判斷字串是否空白
+        System.out.println(" ".isBlank());
+
+        // 去除首尾空格
+        System.out.println(" Javastack　　".strip());        // "Javastack"
+
+        System.out.println("　Javastack　".trim());
+
+        // 去除尾部空格
+        System.out.println(" Javastack ".stripTrailing());  // " Javastack"
+
+        // 去除首部空格
+        System.out.println(" Javastack ".stripLeading());   // "Javastack "
+
+        //複製字串
+        System.out.println("Java".repeat(3));             // "JavaJavaJava"
+
+        //行數統計
+        System.out.println("A\nB\nadfasd".lines().count());    // 3
+----
+
+* trim 只能去除半形空格，而 strip 是去除半形與全形空格。
+
+
+===  Lambda 參數支援var
+
+[source,java]
+----
+(var s1, var s2) -> s1 + s2
+
+(@Nonnull var s1, @Nonnull var s2) -> s1 + s2
+----
+
+=== 在文件中讀取/寫入字串
+
+[source,java]
+----
+Path path = Files.writeString(Files.createTempFile("test", ".txt"), "This was posted on JD");
+
+System.out.println(path);
+String s = Files.readString(path);
+System.out.println(s); //This was posted on JD
+----
+
+
+=== Collection.toArray(IntFunction)
+
+[source,java]
+----
+public class HelloWorld 
+{
+    public static void main(String[] args) 
+    {
+        List<String> names = new ArrayList<>();
+        names.add("alex");
+        names.add("brian");
+        names.add("charles");
+ 
+        String[] namesArr1 = names.toArray(new String[names.size()]);       //Before Java 11
+ 
+        String[] namesArr2 = names.toArray(String[]::new);                  //Since Java 11
+    }
+}
+----
+
+
+=== 參考資料
+
+https://howtodoinjava.com/java11/features-enhancements/[Java 11 new features and enhancements]

@@ -1,0 +1,166 @@
+== JAVA12
+
+
+=== Collectors.teeing() in Stream API
+
+* 將兩個資料輸入並串成一個
+
+
+[soruce,java]
+----
+    List<Student> studentList = Arrays.asList(
+                Student.of("A", ThreadLocalRandom.current().nextInt(0, 101)),
+                Student.of("B", ThreadLocalRandom.current().nextInt(0, 101)),
+                Student.of("C", ThreadLocalRandom.current().nextInt(0, 101)),
+                Student.of("D", ThreadLocalRandom.current().nextInt(0, 101)),
+                Student.of("E", ThreadLocalRandom.current().nextInt(0, 101)),
+                Student.of("F", ThreadLocalRandom.current().nextInt(0, 101)));
+
+    String teeingResult = studentList.stream().collect(
+        Collectors.teeing(
+        
+            Collectors.averagingInt(new ToIntFunction<Student>() {
+
+                            @Override
+                            public int applyAsInt(Student student) {
+                                return student.getMathScore();
+                            }
+                        }),
+                        Collectors.summingInt(new ToIntFunction<Student>() {
+                            @Override
+                            public int applyAsInt(Student value) {
+                                log.info(value.toString());
+                                return value.getMathScore();
+                            }
+                        }),
+                        new BiFunction<Double, Integer, String>() {
+                            @Override
+                            public String apply(Double aDouble, Integer integer) {
+                                return aDouble.toString() + " : " + integer.toString();
+                            }
+                        }
+                )
+        );
+        log.info(teeingResult);
+----
+
+
+=== String API Changes
+
+==== String.indent()
+
+* 將字串做分行與依照輸入的數值做增加空格或減少字數的動作
+
+* 建議點進去看原始碼會比較清楚
+
+[source,java]
+----
+   @Test
+    public void stringIndent(){
+        String result = "foo\nbar\nbar2";
+
+        System.out.println(result.indent(9));
+
+    }
+    
+    output:
+         foo
+         bar
+         bar2
+----
+
+==== String.transform()
+
+* 將字串轉換(搭配function<String,T>)，且可以連續執行
+
+
+[source,java]
+----
+    @Test
+    public void stringTransform() {
+        List<String> names = List.of(
+                "   Alex",
+                "brian");
+
+        List<String> transformedNames = new ArrayList<>();
+
+        for (String name : names) {
+            String transformedName = name.transform(String::strip)
+                    .transform(new Function<String, String>() {
+                        @Override
+                        public String apply(String s) {
+                            return s.toUpperCase();
+                        }
+                    });
+
+            transformedNames.add(transformedName);
+        }
+        transformedNames.forEach(ele -> log.info("ele : " + ele));
+
+
+        String wasd = new String("sadAasdF");
+        String tr2 = wasd.transform(new Function<String, String>() {
+
+            /**
+             * Applies this function to the given argument.
+             *
+             * @param s the function argument
+             * @return the function result
+             */
+            @Override
+            public String apply(String s) {
+                return s.toLowerCase();
+            }
+        });
+        System.out.println(tr2);
+    }
+----
+
+
+=== Files.mismatch
+
+* 比較兩個檔案，並返回檔案的Byte值中，不一樣的位置(為long)，如果依樣則返回-1
+
+
+
+[source,java]
+----
+Path helloworld1 = tempDir.resolve("helloworld1.txt");
+ 
+Path helloworld2 = tempDir.resolve("helloworld2.txt");
+ 
+long diff = Files.mismatch(helloworld1, helloworld2);
+----
+
+=== Compact Number Formatting
+
+* 數字格式化
+
+[source,java]
+----
+         NumberFormat formatter = NumberFormat.getCompactNumberInstance(Locale.TAIWAN,
+                NumberFormat.Style.SHORT);
+
+        String formattedString = formatter.format(953000L);
+        log.info(formattedString);
+        
+        output:
+            95萬
+----
+
+
+=== 參考資料
+
+https://openjdk.java.net/projects/jdk/12/[JDK 12]
+
+https://howtodoinjava.com/java12/new-features-enhancements/[Java 12 – New features and enhancements]
+
+https://javahungry.blogspot.com/2019/06/java12-features-and-enhancements.html[ Java 12 New Features and Enhancements ]
+
+https://segmentfault.com/a/1190000022624359[JDK12的新特性:teeing collectors]
+
+
+https://zhuanlan.zhihu.com/p/59798800[5分钟了解Java 12 八大新特性]
+
+https://blog.csdn.net/youanyyou/article/details/88729870[
+Java 12 正式发布，8大新特性！]

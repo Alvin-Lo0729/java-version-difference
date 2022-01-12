@@ -1,0 +1,27 @@
+== JAVA9
+
+include::jep213.adoc[]
+
+include::jep266.adoc[]
+
+include::jep269.adoc[]
+
+=== @Deprecated標籤增加註解
+
+From Java 9, @Deprecated annotation will have two attributes i.e. forRemoval and since.
+
+    forRemoval – Indicates whether the annotated element is subject to removal in a future version.
+    
+    since – It returns the version in which the annotated element became deprecated.
+
+
+=== 參考資料
+
+* https://openjdk.java.net/projects/jdk9/[JDK 9 Features]
+
+* https://howtodoinjava.com/java9/java9-new-features-enhancements/#stream-api[Java 9 Features and Enhancements]
+
+* https://www.runoob.com/java/java9-new-features.html[Java 9 新特性 ]
+
+
+* https://www.infoworld.com/blog/java-qanda/[java Q&A]

@@ -1,0 +1,478 @@
+= Java9~17更新內容
+羅星傑 <alvin@e-mon.com.tw>
+v1.0, 2021-10-27
+:experimental:
+:icons: font
+:source-highlighter: prettify
+:sectnums:
+:toc: left
+:toc-title: 大綱
+:imagesdir: images
+
+
+include::java9/JAVA9.adoc[]
+
+
+== JAVA10
+
+=== JEP 286: Local-Variable Type Inference
+
+* 局部變數推斷
+** 範例
+
+.範例
+[source,java]
+----
+var list = new ArrayList<String>();  // infers ArrayList<String>
+var stream = list.stream();          // infers Stream<String>
+----
+
+** 錯誤範例
+
+[source,java]
+----
+var x;
+
+= var f = () -> { };
+
+var g = null;
+
+var c = l();
+
+var m = this::l;
+
+var k = { 1 , 2 };
+ 
+----
+
+=== 參考資料
+
+* https://openjdk.java.net/projects/jdk/10/[JDK 10 Features]
+
+* https://howtodoinjava.com/java10/java10-features/[Java 10 Features and Enhancements]
+
+* https://segmentfault.com/a/1190000015356977[Java 10的10个新特性，将彻底改变你写代码的方式！]
+
+
+include::java11/java11.adoc[]
+
+
+include::java12/java12.adoc[]
+
+== JAVA13
+
+=== JEP-353 : Reimplement the Legacy Socket API
+
+* java.net.Socket 和 java.net.ServerSocket是java1.0 就早已引入，但實現該class的為java與c，所以導致維護和調整都不易，在java13中改用NioSocketImpl代替舊版的PlainSocketImpl
+
+[source,java]
+----
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+public class Test {
+    public static void main(String[] args) {
+        try (ServerSocket serverSocket = new ServerSocket(8000)){
+            boolean running = true;
+            while(running){
+                Socket clientSocket = serverSocket.accept();
+                //do something with clientSocket
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+----
+
+* java13
+
+[source,text]
+----
+➜  develop ./jdk-13.0.2.jdk/Contents/Home/bin/java -XX:+TraceClassLoading Test.java | grep SocketImpl
+[0.699s][info   ][class,load] java.net.SocketImpl source: jrt:/java.base
+[0.699s][info   ][class,load] java.net.SocketImpl$$Lambda$173/0x0000000800c37440 source: java.net.SocketImpl
+[0.702s][info   ][class,load] sun.net.PlatformSocketImpl source: jrt:/java.base
+[0.702s][info   ][class,load] sun.nio.ch.NioSocketImpl source: jrt:/java.base
+[0.713s][info   ][class,load] sun.nio.ch.NioSocketImpl$FileDescriptorCloser source: jrt:/java.base
+----
+
+* java12 before
+
+[source,text]
+----
+➜  develop ./jdk-12.0.2.jdk/Contents/Home/bin/java -XX:+TraceClassLoading Test.java | grep SocketImpl
+[0.665s][info   ][class,load] java.net.SocketImpl source: jrt:/java.base
+[0.665s][info   ][class,load] java.net.AbstractPlainSocketImpl source: jrt:/java.base
+[0.665s][info   ][class,load] java.net.PlainSocketImpl source: jrt:/java.base
+[0.665s][info   ][class,load] java.net.SocksSocketImpl source: jrt:/java.base
+[0.666s][info   ][class,load] java.net.AbstractPlainSocketImpl$1 source: jrt:/java.base
+----
+
+=== 參考資料
+
+https://jishuin.proginn.com/p/763bfbd6259e[Java 13 新功能介绍]
+
+== JAVA14
+
+=== JEP 358 – Helpful NullPointerExceptions
+
+* 在Java14中，增強了對於NullPointerException的描述，但需要使用命令列開啟
+
+[source,text]
+----
+-XX:+ShowCodeDetailsInExceptionMessages
+----
+
+[source,text]
+----
+public class HelpfulNullPointerException
+{
+    public static void main(String[] args)
+    {
+        Employee e = null;
+
+        System.out.println(e.getName());
+    }
+}
+----
+
+* Java14
+
+[source,text]
+----
+Exception in thread "main" java.lang.NullPointerException:
+    Cannot invoke "com.howtodoinjava.core.basic.Employee.getName()" because "e" is null
+    at com.howtodoinjava.core.basic.HelpfulNullPointerException.main
+    (HelpfulNullPointerException.java:9)
+----
+
+* before Java14
+
+[source,text]
+----
+Exception in thread "main" java.lang.NullPointerException
+    at com.howtodoinjava.core.basic.HelpfulNullPointerException.main
+    (HelpfulNullPointerException.java:9)
+----
+
+=== 參考資料
+
+https://howtodoinjava.com/java14/java14-new-features/[java14-new-features]
+
+== JAVA15
+
+=== JEP-339: Edwards-Curve Digital Signature Algorithm (EdDSA)
+
+* 新增EdDSA數位簽章
+
+[source,java]
+----
+import java.nio.charset.StandardCharsets;
+import java.security.*;
+import java.util.Base64;
+
+public class EdwardAlgoExample {
+  public static void main(String[] args)
+      throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+
+    KeyPairGenerator kpg = KeyPairGenerator.getInstance("Ed25519");
+    KeyPair kp = kpg.generateKeyPair();
+
+    byte[] msg = "test_string".getBytes(StandardCharsets.UTF_8);
+
+    Signature sig = Signature.getInstance("Ed25519");
+    sig.initSign(kp.getPrivate());
+    sig.update(msg);
+    byte[] s = sig.sign();
+
+    String encodedString = Base64.getEncoder().encodeToString(s);
+    System.out.println(encodedString);
+  }
+}
+----
+
+[source,text]
+----
+O+FQIdJylUF0GW//O+gVGmsAwGDQBuCZkULqgQdpvj
+H3koFL3wpSrwN1zzjgWOGLXtyDFrJxvwD1J7rIIY+AAw==
+----
+
+=== JEP-378: Text Blocks
+
+[source,java]
+----
+public String getBlockOfHtml() {
+    return """
+            <html>
+
+                <body>
+                    <span>example text</span>
+                </body>
+            </html>""";
+}
+----
+
+[source,java]
+----
+  String expected = "<html>\n"
+      + "\n"
+      + "    <body>\n"
+      + "        <span>example text</span>\n"
+      + "    </body>\n"
+      + "</html>";
+----
+
+=== 參考資料
+
+https://openjdk.java.net/projects/jdk/15/[JDK 15]
+https://howtodoinjava.com/java15/java-15-new-features/[Java 15 New Features]
+https://mkyong.com/java/what-is-new-in-java-15/[What is new in Java 15]
+https://blog.csdn.net/xgw1010/article/details/109904474[java 12 、13、14、15新特性汇总]
+
+== JAVA16
+
+=== JEP-394:Pattern Matching for instanceof
+
+* instanceof 匹配
+
+[source,java]
+----
+public class InstanceOfExample {
+    public static void main(String[] args){
+        Object obj = "TEST";
+
+        if (obj instanceof String t) {
+            System.out.println(t);
+        }
+
+        if (obj instanceof String s && s.length() > 5) {
+            Boolean flag = s.contains("jdk");
+        }
+    }
+}
+----
+
+=== JEP-395: Records
+
+* 新增Records，可用來撰寫較為簡化的POJO
+
+[source,java]
+----
+class Point {
+    private final int x;
+    private final int y;
+
+    Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    int x() { return x; }
+    int y() { return y; }
+
+    public boolean equals(Object o) {
+        if (!(o instanceof Point)) return false;
+        Point other = (Point) o;
+        return other.x == x && other.y == y;
+    }
+
+    public int hashCode() {
+        return Objects.hash(x, y);
+    }
+
+    public String toString() {
+        return String.format("Point[x=%d, y=%d]", x, y);
+    }
+}
+----
+
+** Record
+
+[source,java]
+----
+
+    record Point(int x, int y) { }
+
+----
+
+=== JEP-392: Packaging Tool
+
+[source,text]
+----
+jpackage --name myapp --input lib --main-jar main.jar
+或者 直接指定main class
+jpackage --name myapp --input lib --main-jar main.jar --main-class myapp.Main
+
+
+jpackage --name myapp --module-path lib -m myapp
+或者直接指定main class
+jpackage --name myapp --module-path lib -m myapp/myapp.Main
+----
+
+=== JEP-396: Strongly Encapsulate JDK Internals by Default
+
+* 鼓勵大家使用標準API，所以使用JDK內部API如 com.sun.*, jdk.*, and org.* 會報錯誤
+
+[source,text]
+----
+
+System.out.println(sun.security.util.SecurityConstants.ALL_PERMISSION);
+
+----
+
+* 解除方法
+
+[source,text]
+----
+
+--illegal-access=permit 允許使用内部API
+--illegal-access=warn 允許使用内部API，但每次使用都會得到一個警告
+--illegal-access=debug 允許使用内部API，会更详细的打印每一个错误的调用堆栈，用它你就可以找到你在哪里有不正确的调用，就可以修复那些不合适的使用
+--illegal-access=deny 禁止使用内部API
+
+----
+
+=== JEP-338: Vector API (Incubator)
+
+* 向量API
+
+[source,java]
+----
+public class example{
+    public static void main(String[] args){
+        int[] a = {1, 2, 3, 4};
+        int[] b = {5, 6, 7, 8};
+
+        var c = new int[a.length];
+
+        for (int i = 0; i < a.length; i++) {
+            c[i] = a[i] * b[i];
+        }
+    }
+}
+
+----
+
+[source,java]
+----
+public class example{
+    public static void main(String[] args){
+
+        int[] a = {1, 2, 3, 4};
+        int[] b = {5, 6, 7, 8};
+
+        var vectorA = IntVector.fromArray(IntVector.SPECIES_128, a, 0);
+        var vectorB = IntVector.fromArray(IntVector.SPECIES_128, b, 0);
+        var vectorC = vectorA.mul(vectorB);
+        vectorC.intoArray(c, 0);
+    }
+}
+----
+
+=== Day Period Support
+
+* 日期格式新增規格
+
+[source,java]
+----
+public class LocalTimeFormatExample{
+    public static void main(String[] args){
+        LocalTime date = LocalTime.parse("15:25:08.690791");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h B");
+        assertThat(date.format(formatter)).isEqualTo("3 in the afternoon");
+    }
+}
+----
+
+=== Add Stream.toList Method
+
+[source,java]
+----
+public class StreamExample{
+    public static void main(String[] args){
+        List<String> integersAsString = Arrays.asList("1", "2", "3");
+
+        List<Integer> ints = integersAsString.stream().map(Integer::parseInt).collect(Collectors.toList());
+
+        List<Integer> intsEquivalent = integersAsString.stream().map(Integer::parseInt).toList();
+    }
+}
+----
+
+=== 參考資料
+
+https://openjdk.java.net/projects/jdk/16/[JDK 16]
+
+https://mkyong.com/java/what-is-new-in-java-16/[What is new in Java 16]
+
+https://cloud.tencent.com/developer/article/1803962#jep-338%E5%90%91%E9%87%8F-api%E5%AD%B5%E5%8C%96%E5%99%A8[Java 16 正式发布，新特性一一解析]
+
+https://www.baeldung.com/java-16-new-features[New Features in Java 16]
+
+== JAVA17
+
+=== JEP-356:Enhanced Pseudo-Random Number Generators
+
+* 增強型隨機數生成器
+
+[source,java]
+----
+public class Jep365Example {
+public static void main(String[] args) {
+
+        RandomGenerator randomGenerator = RandomGeneratorFactory.of("Xoshiro256PlusPlus").create(999);
+        for (var i = 0; i < 10; i++) {
+            System.out.println(randomGenerator.nextInt(0, 11));
+        }
+    }
+}
+----
+
+=== JEP-403: Strongly Encapsulate JDK Internals
+
+* 無法使用JEP-396的方式，用指令使用JDK內非標準API
+
+=== JEP-409: Sealed Classes
+
+* 新增Sealed Classes，可用在於封閉父類別，並指定子類別或 封閉介面並決定可實作的類別或介面
+
+* 以下範例就是指定Circle, Rectangle, Square為可繼承類別
+[source,java]
+----
+public sealed class Shape permits Circle, Rectangle, Square {
+
+}
+----
+
+* 繼承後的類別須為final 或者 繼續加上 Sealed再度指定可繼承或實作的類別或介面 或者 加上 non-sealed 則為開放，就可被其他類繼承或實作
+
+[source,java]
+----
+public final class Circle extends Shape {
+    //使用final僅限於Class
+}
+
+public sealed class Rectangle extends Shape permits Tasdf{
+}
+
+public non-sealed class Square extends Shape {
+}
+----
+
+=== 參考資料
+
+https://openjdk.java.net/projects/jdk/17/[JDK 17]
+
+https://howtodoinjava.com/java17/new-features/[Java 17 Features and Enhancements]
+
+https://www.baeldung.com/java-17-new-features[New Features in Java 17]
+
+https://segmentfault.com/a/1190000040701755[一文总结Java\JDK 17发布的新特性]
+
+https://zhuanlan.zhihu.com/p/398777514[JDK 17 - Java 17 的新特性速览]
+
+https://xie.infoq.cn/article/0c8e1a434f94bc0d6be4eff2d[Java 新技术：封闭类]
+
+https://www.baeldung.com/java-sealed-classes-interfaces[Sealed Classes and Interfaces in Java 15]
+

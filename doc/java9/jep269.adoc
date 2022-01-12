@@ -1,0 +1,61 @@
+=== JEP-269: Convenience Factory Methods for Collections
+
+* 在List、Set、Map的interface，新增靜態方法，方便建立不可變動的實體
+
+** java9之前
+[source,java]
+----
+import java.util.*;
+
+public class ConvenienceFactoryMethodsForCollections {
+    public static void main(String[] args) {
+        Set<String> set = new HashSet<>();
+        set.add("A");
+        set.add("B");
+        set.add("C");
+        set = Collections.unmodifiableSet(set);
+        System.out.println(set);
+        List<String> list = new ArrayList<>();
+
+        list.add("A");
+        list.add("B");
+        list.add("C");
+        list = Collections.unmodifiableList(list);
+        System.out.println(list);
+        Map<String, String> map = new HashMap<>();
+
+        map.put("A", "Apple");
+        map.put("B", "Boy");
+        map.put("C", "Cat");
+        map = Collections.unmodifiableMap(map);
+        System.out.println(map);
+    }
+}
+----
+
+** java9
+[source,java]
+----
+import java.util.AbstractMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+public class ConvenienceFactoryMethodsForCollections{
+   public static void main(String[] args) {
+        Set<String> set = Set.of("A", "B", "C");
+        System.out.println(set);
+        List<String> list = List.of("A", "B", "C");
+        System.out.println(list);
+
+        Map<String, String> map = Map.of("A", "Apple", "B", "Boy", "C", "Cat");
+        System.out.println(map);
+
+        Map<String, String> map1 = Map.ofEntries(
+                new AbstractMap.SimpleEntry<>("A", "Apple"),
+                new AbstractMap.SimpleEntry<>("B", "Boy"),
+                new AbstractMap.SimpleEntry<>("C", "Cat"));
+        System.out.println(map1);
+    }
+}
+----

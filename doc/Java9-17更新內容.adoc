@@ -16,11 +16,10 @@ v1.0, 2021-10-27
 :url-project: https://github.com
 
 ifdef::env-site[:url-project: link:]
-
 :url-rel-file-base: link:
 ifdef::env-site,env-yard[]
 :url-rel-file-base: {url-repo}/blob/HEAD/
-
+https://github.com
 
 
 

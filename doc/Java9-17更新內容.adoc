@@ -8,6 +8,22 @@ v1.0, 2021-10-27
 :toc: left
 :toc-title: 大綱
 :imagesdir: images
+:hide-uri-scheme:
+
+// URLs:
+:url-org: https://github.com/Alvin-Lo0729
+:url-repo: {url-org}/java-version-difference
+:url-project: https://github.com
+
+ifdef::env-site[:url-project: link:]
+
+:url-rel-file-base: link:
+ifdef::env-site,env-yard[]
+:url-rel-file-base: {url-repo}/blob/HEAD/
+
+
+
+
 
 
 include::java9/JAVA9.adoc[]
